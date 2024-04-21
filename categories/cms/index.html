@@ -186,10 +186,361 @@ pre{border: 1px solid #303030}
 </section>
 
     </div>
-    <a href="#" class="mdui-fab mdui-fab-fixed mdui-hidden-xs mdui-color-theme-accent mdui-ripple"><i class="mdui-icon material-icons">keyboard_arrow_up</i></a>
+    <a href="#" class="mdui-fab mdui-fab-fixed mdui-hidden-xs0 mdui-color-theme-accent mdui-ripple"><i class="mdui-icon material-icons">keyboard_arrow_up</i></a>
+
 
 <script src="https://cdn.jsdelivr.net/npm/mdui@1.0.2/dist/js/mdui.min.js"></script>
 
+
+    <script src="/tech/js/s-hide-bt.js"></script>
+
+<script>
+    var $ = mdui.$;
+    function init(){
+        //
+    }
+    window.addEventListener("load", () => {
+        //
+        init()
+    }, {once: true});
+</script>
+
+</body>
+</html>
+v>
+    <div class="mdui-card-primary-subtitle mdui-typo">
+        <div> <a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/">cms</a>><a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/WordPress/">WordPress</a>><a class="mdui-text-color-theme-text category-link" href="/tech/categories/%E3%83%A1%E3%83%A2/">メモ</a></div>
+        
+        <time class="dt-published" mdui-tooltip="{content:'投稿日：2014-01-31 03:03<br>編集日：2024-04-17 04:04'}" datetime="2014-01-31T06:03:13.000Z">2014-01-31</time>
+        
+        <span>-</span>
+        <span><a class="tag-none-link" href="/tech/tags/PHP/" rel="tag">PHP</a> <a class="tag-none-link" href="/tech/tags/WordPress/" rel="tag">WordPress</a> <a class="tag-none-link" href="/tech/tags/%E3%83%96%E3%83%AD%E3%82%B0/" rel="tag">ブログ</a> <a class="tag-none-link" href="/tech/tags/%E3%83%A1%E3%83%A2/" rel="tag">メモ</a> <a class="tag-none-link" href="/tech/tags/%E3%83%AA%E3%83%93%E3%82%B8%E3%83%A7%E3%83%B3/" rel="tag">リビジョン</a> <a class="tag-none-link" href="/tech/tags/%E3%83%AA%E3%83%93%E3%82%B8%E3%83%A7%E3%83%B3%E7%AE%A1%E7%90%86/" rel="tag">リビジョン管理</a> <a class="tag-none-link" href="/tech/tags/%E4%BF%9D%E5%AD%98/" rel="tag">保存</a> <a class="tag-none-link" href="/tech/tags/%E7%84%A1%E5%8A%B9/" rel="tag">無効</a> <a class="tag-none-link" href="/tech/tags/%E7%AE%A1%E7%90%86/" rel="tag">管理</a> <a class="tag-none-link" href="/tech/tags/%E8%87%AA%E5%8B%95/" rel="tag">自動</a> <a class="tag-none-link" href="/tech/tags/%E8%87%AA%E5%8B%95%E4%BF%9D%E5%AD%98/" rel="tag">自動保存</a> <a class="tag-none-link" href="/tech/tags/%E8%A8%98%E4%BA%8B/" rel="tag">記事</a></span>
+        
+    </div>
+</div>
+
+    
+    
+    <div class="mdui-divider"></div>
+    <div class="mdui-card-content mdui-typo">
+        
+        <div class="p-summary" style="display:none"></div>
+        <main class="e-content"><p>WordPressの記事IDが連番にならずに飛び飛びで増えていくので、原因を調べたところ、リビジョン管理機能を使っているとそうなっちゃうらしいってことがわかったので、折角だからプラグインを使わずに無効化する方法を調べた。  </p>
+<p>wp-config.php  </p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token comment">/** リビジョン管理を無効にする */</span>  
+<span class="token function">define</span><span class="token punctuation">(</span><span class="token constant">WP_POST_REVISIONS</span><span class="token punctuation">,</span> <span class="token constant boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+  
+<span class="token comment">/** 自動保存の間隔を5日にする（実質の無効） */</span>  
+<span class="token function">define</span><span class="token punctuation">(</span><span class="token constant">AUTOSAVE_INTERVAL</span><span class="token punctuation">,</span> <span class="token number">432000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  </code></pre>
+<p>↓このコードよりも前に記述すること  </p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token comment">/** Sets up WordPress vars and included files. */</span>  
+<span class="token keyword">require_once</span><span class="token punctuation">(</span><span class="token constant">ABSPATH</span> <span class="token operator">.</span> <span class="token string single-quoted-string">'wp-settings.php'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<p>また、自動保存の間隔を30日とかすごく長くしたら、表示がおかしくなった。<br>具体的には「下書きとして保存」や「公開」のボタンが高速で点滅するような感じ。  </p>
+<p>上記は5日に設定したら治った。  </p>
+<p>また、タイトルを入力した時に走る自動保存を無効にするために以下のコードをfunctions.phpに追加する。  </p>
+<p>functions.php  </p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token comment">/* 記事のオートセーブを無効 */</span>
+<span class="token keyword">function</span> <span class="token function-definition function">disable_autosave</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+<span class="token function">wp_deregister_script</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'autosave'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  
+<span class="token punctuation">&#125;</span>  
+<span class="token function">add_action</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'wp_print_scripts'</span><span class="token punctuation">,</span><span class="token string single-quoted-string">'disable_autosave'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<p>参考サイトはいっぱいあってよくわからなくなったので割愛（ごめんなさい！！）</p>
+</main>
+        
+    </div>
+    
+</article>
+
+    
+        <article class="h-entry mdui-card mdui-hoverable mdui-shadow-1 mdui-m-y-2" style="opacity: 1; border-radius: 4px"
+>
+    
+    <div class="mdui-card-primary mdui-ripple">
+    <div class="mdui-card-primary-title">
+        <a role="heading" aria-level="1" class="u-url p-name mdui-text-color-theme-text" href="/tech/2011/03/67/">Wi-FiとEye-FiとMTとわたし</a>
+        <a class="p-author h-card" style="display:none" href="https://junka.net/tech">Junka</a>
+        
+    </div>
+    <div class="mdui-card-primary-subtitle mdui-typo">
+        <div> <a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/">cms</a>><a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/MovableType/">MovableType</a>><a class="mdui-text-color-theme-text category-link" href="/tech/categories/%E3%83%91%E3%82%BD%E3%82%B3%E3%83%B3%E7%92%B0%E5%A2%83/">パソコン環境</a></div>
+        
+        <time class="dt-published" mdui-tooltip="{content:'投稿日：2011-03-11 02:17<br>編集日：2024-04-17 03:54'}" datetime="2011-03-10T17:17:40.000Z">2011-03-11</time>
+        
+        <span>-</span>
+        <span><a class="tag-none-link" href="/tech/tags/Eye-Fi/" rel="tag">Eye-Fi</a> <a class="tag-none-link" href="/tech/tags/MT/" rel="tag">MT</a> <a class="tag-none-link" href="/tech/tags/MovableType/" rel="tag">MovableType</a> <a class="tag-none-link" href="/tech/tags/Wi-Fi/" rel="tag">Wi-Fi</a> <a class="tag-none-link" href="/tech/tags/WiMAX/" rel="tag">WiMAX</a> <a class="tag-none-link" href="/tech/tags/%E3%82%8F%E3%81%9F%E3%81%97/" rel="tag">わたし</a></span>
+        
+    </div>
+</div>
+
+    
+    
+    <div class="mdui-divider"></div>
+    <div class="mdui-card-content mdui-typo">
+        
+        <div class="p-summary" style="display:none"></div>
+        <main class="e-content"><p>モバイルWi-Fiサービルであるところの、WiMAXに興味があるけど、実際の電波の入りだとか、使用感がわからないと、年契縛りの契約なんてできないよ。  </p>
+<p>なんて思ってたら、お試しレンタル制度「TRY WiMAX」というのがあるらしくて、早速申し込んでみた（ネットで）。  </p>
+<p>とっても快適で、もう手放したくないぐらいの勢いですが、おうちではネットゲームをやったりする都合上（と言ってもごくたまにだけど）家の回線もこれ一本化するのは現実的じゃないなあ、と。  </p>
+<p>だったら、iPhoneの割賦が完了するまで待っとこう。というのが結論。  </p>
+<p>それはそうと、久しぶりのWi-Fi環境なので、カンタン写真転送システム「Eye-Fi」の環境を久しぶりに整えてみようと思ったわけです。  </p>
+<p>まあ、便利便利。  </p>
+<p>んで、以前にチャレンジして、結局失敗したまま放置していた、Eye-FiからMTに写真を自動転送してみようの件に取り組んでみたんだけど、やっぱりどうやってもうまくいかなくて。  </p>
+<p>前回の時に、パスワードはログインパスワードではなくて、Webパスワードという別のものなんだ、ということが頂いたコメントから判明したわけなんですが、それを確認したにもかかわらず、うまくいかない…どうしても。  </p>
+<p>ググってもあんまり情報無いし…（自分のブログが上位に表示される始末）あまり需要がないのかなー？  </p>
+<p>あ。ストレージ環境のその後についてお話するの忘れてたな。…そのことはまた次回ということで。</p>
+</main>
+        
+    </div>
+    
+</article>
+
+    
+        <article class="h-entry mdui-card mdui-hoverable mdui-shadow-1 mdui-m-y-2" style="opacity: 1; border-radius: 4px"
+>
+    
+    <div class="mdui-card-primary mdui-ripple">
+    <div class="mdui-card-primary-title">
+        <a role="heading" aria-level="1" class="u-url p-name mdui-text-color-theme-text" href="/tech/2009/08/56/">PostToTwitterの、設定</a>
+        <a class="p-author h-card" style="display:none" href="https://junka.net/tech">Junka</a>
+        
+    </div>
+    <div class="mdui-card-primary-subtitle mdui-typo">
+        <div> <a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/">cms</a>><a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/MovableType/">MovableType</a></div>
+        
+        <time class="dt-published" mdui-tooltip="{content:'投稿日：2009-08-22 01:29<br>編集日：2024-04-17 03:54'}" datetime="2009-08-21T16:29:20.000Z">2009-08-22</time>
+        
+        <span>-</span>
+        <span><a class="tag-none-link" href="/tech/tags/MovableType/" rel="tag">MovableType</a> <a class="tag-none-link" href="/tech/tags/PlugIn/" rel="tag">PlugIn</a> <a class="tag-none-link" href="/tech/tags/PostToTwitter/" rel="tag">PostToTwitter</a> <a class="tag-none-link" href="/tech/tags/%E8%A8%AD%E5%AE%9A/" rel="tag">設定</a></span>
+        
+    </div>
+</div>
+
+    
+    
+    <div class="mdui-divider"></div>
+    <div class="mdui-card-content mdui-typo">
+        
+        <div class="p-summary" style="display:none"></div>
+        <main class="e-content"><img src="/tech/assets/mt_tech/images/090821_posttotwitter.jpg" class="" width="400" title="PostToTwitterの設定" alt="PostToTwitterの設定">  
+<p><a href="/tech/2009/08/posttotwitter">前のエントリー</a>で、twitterにブログ更新を送信するMTプラグイン、PostToTwitterが思うように動いてくれない、と書きましたけれども。  </p>
+<p>「XML-RPC newPostメソッドを無視します。」にチェックを入れて設定したら、できました。  </p>
+<p>サーバーサイドスクリプトの知識はほとんど無いけれども、いろいろ試してみないとダメだなあ、と思いました。</p>
+</main>
+        
+    </div>
+    
+</article>
+
+    
+        <article class="h-entry mdui-card mdui-hoverable mdui-shadow-1 mdui-m-y-2" style="opacity: 1; border-radius: 4px"
+>
+    
+    <div class="mdui-card-primary mdui-ripple">
+    <div class="mdui-card-primary-title">
+        <a role="heading" aria-level="1" class="u-url p-name mdui-text-color-theme-text" href="/tech/2009/08/55/">PostToTwitter、仕事サボってない？</a>
+        <a class="p-author h-card" style="display:none" href="https://junka.net/tech">Junka</a>
+        
+    </div>
+    <div class="mdui-card-primary-subtitle mdui-typo">
+        <div> <a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/">cms</a>><a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/MovableType/">MovableType</a></div>
+        
+        <time class="dt-published" mdui-tooltip="{content:'投稿日：2009-08-21 02:55<br>編集日：2024-04-17 03:54'}" datetime="2009-08-21T05:55:33.000Z">2009-08-21</time>
+        
+        <span>-</span>
+        <span><a class="tag-none-link" href="/tech/tags/MovableType/" rel="tag">MovableType</a> <a class="tag-none-link" href="/tech/tags/PlugIn/" rel="tag">PlugIn</a> <a class="tag-none-link" href="/tech/tags/PostToTwitter/" rel="tag">PostToTwitter</a> <a class="tag-none-link" href="/tech/tags/%E4%BB%95%E4%BA%8B/" rel="tag">仕事</a></span>
+        
+    </div>
+</div>
+
+    
+    
+    <div class="mdui-divider"></div>
+    <div class="mdui-card-content mdui-typo">
+        
+        <div class="p-summary" style="display:none"></div>
+        <main class="e-content"><p><a target="_blank" rel="noopener" href="http://labs.m-logic.jp/cat2/posttotwitter/">PostToTwitter</a>という、MTのプラグインを使って、<a href="/blog">メインブログ</a>の記事投稿を<a target="_blank" rel="noopener" href="https://twitter.com/junka_net">Twitter</a>に反映させるように設定したんだけど、うまく動いてくれないんですよこれが。  </p>
+<p>このプラグイン、最新バージョン1.2.0では、記事の公開ステータスを「下書き」から「公開」にするとTwitter投稿、という設定ができるんですが、わたしはほとんど下書きなどしないし、必要ないのでこのチェックは外してる。  </p>
+<p>にもかかわらず、普通に投稿した記事がTwitされない。  </p>
+<p>試しに、投稿済みの記事を一旦「下書き」に戻してから再び「公開」にしたら、Twitされた…  </p>
+<p>今夜あたり、こんな余計な機能が無い古いバージョンに戻してみるか、他のプラグインを探してみるかします。  </p>
+<p>ん、ブログエントリをTwitter投稿する外部サービスはいろいろあるみたいですけどね。なんとなく使いたくないです。使ったら負けだと思っている。できることならMT内で解決させたい。</p>
+</main>
+        
+    </div>
+    
+</article>
+
+    
+        <article class="h-entry mdui-card mdui-hoverable mdui-shadow-1 mdui-m-y-2" style="opacity: 1; border-radius: 4px"
+>
+    
+    <div class="mdui-card-primary mdui-ripple">
+    <div class="mdui-card-primary-title">
+        <a role="heading" aria-level="1" class="u-url p-name mdui-text-color-theme-text" href="/tech/2009/06/47/">Eye-FiからMTに写真をアップロード！？</a>
+        <a class="p-author h-card" style="display:none" href="https://junka.net/tech">Junka</a>
+        
+    </div>
+    <div class="mdui-card-primary-subtitle mdui-typo">
+        <div> <a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/">cms</a>><a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/MovableType/">MovableType</a>><a class="mdui-text-color-theme-text category-link" href="/tech/categories/%E3%83%A1%E3%83%A2/">メモ</a>><a class="mdui-text-color-theme-text category-link" href="/tech/categories/%E9%9B%91%E8%AB%87/">雑談</a></div>
+        
+        <time class="dt-published" mdui-tooltip="{content:'投稿日：2009-06-01 12:03<br>編集日：2024-04-17 03:54'}" datetime="2009-05-31T15:03:34.000Z">2009-06-01</time>
+        
+        <span>-</span>
+        <span><a class="tag-none-link" href="/tech/tags/Eye-Fi/" rel="tag">Eye-Fi</a> <a class="tag-none-link" href="/tech/tags/MT/" rel="tag">MT</a> <a class="tag-none-link" href="/tech/tags/MovableType/" rel="tag">MovableType</a> <a class="tag-none-link" href="/tech/tags/%E3%82%A2%E3%83%83%E3%83%97%E3%83%AD%E3%83%BC%E3%83%89/" rel="tag">アップロード</a> <a class="tag-none-link" href="/tech/tags/%E5%86%99%E7%9C%9F/" rel="tag">写真</a></span>
+        
+    </div>
+</div>
+
+    
+    
+    <div class="mdui-divider"></div>
+    <div class="mdui-card-content mdui-typo">
+        
+        <div class="p-summary" style="display:none"></div>
+        <main class="e-content"><p><a target="_blank" rel="noopener" href="http://www.eye.fi/jp/">Eye-Fi</a>というー、<a href="/blog/2009/05/910">無線LAN機能付きSDメモリーカードを買ったお話をしました</a>が、その後基本的な設定は済んで、撮った写真をぱちょこんにコピーする手間から解放される日々が始まりました。  </p>
+<p>さらについでに、ぱちょこんからMovable Typeに写真をアップロードする手間から解放される日々も始まりたい！ので、その設定をやろう！としているのだけど、うまくいきません。  </p>
+<p>Eye-Fiってば、いろいろなことがかなり簡単に設定できるようになっているみたいで、公式の「よくある質問」を見ても、設定できます。としか書かれてないし、検索してもMTにアップできるんよー、できたよーという話は出てくるけど、その詳しい方法が書かれているところが見つけられない！  </p>
+<p>いや、実際簡単っぽいんだけど。入力欄４つしかないんだけど。（管理画面URL&#x2F;サイトURL&#x2F;ユーザー名&#x2F;パスワード）  </p>
+<p>正しく入力してるつもりなんだけど、どんなにやっても「サービスにログインできません。ユーザー名とパスワードを確認してください」みたいなのが出る。何度も確認してますけど！！！！！  </p>
+<p>マルチブログだからダメなのかと思って、1個のブログしか編集権限を与えていないEye-Fi君専用アカウントまで作ったけどダメ。いったいなにがダメなんですか！！！！  </p>
+<p>だれかしりませんか。  </p>
+<p>と、ここで書いても誰も見てない気がするので意味無いんですけど。うわーん。</p>
+</main>
+        
+    </div>
+    
+</article>
+
+    
+        <article class="h-entry mdui-card mdui-hoverable mdui-shadow-1 mdui-m-y-2" style="opacity: 1; border-radius: 4px"
+>
+    
+    <div class="mdui-card-primary mdui-ripple">
+    <div class="mdui-card-primary-title">
+        <a role="heading" aria-level="1" class="u-url p-name mdui-text-color-theme-text" href="/tech/2009/03/40/">cronうまくいってるっぽい</a>
+        <a class="p-author h-card" style="display:none" href="https://junka.net/tech">Junka</a>
+        
+    </div>
+    <div class="mdui-card-primary-subtitle mdui-typo">
+        <div> <a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/">cms</a>><a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/MovableType/">MovableType</a>><a class="mdui-text-color-theme-text category-link" href="/tech/categories/%E3%83%A1%E3%83%A2/">メモ</a></div>
+        
+        <time class="dt-published" mdui-tooltip="{content:'投稿日：2009-03-24 01:06<br>編集日：2024-04-17 03:54'}" datetime="2009-03-23T16:06:55.000Z">2009-03-24</time>
+        
+        <span>-</span>
+        <span><a class="tag-none-link" href="/tech/tags/MovableType/" rel="tag">MovableType</a> <a class="tag-none-link" href="/tech/tags/cron/" rel="tag">cron</a> <a class="tag-none-link" href="/tech/tags/%E3%83%A1%E3%83%A2/" rel="tag">メモ</a></span>
+        
+    </div>
+</div>
+
+    
+    
+    <div class="mdui-divider"></div>
+    <div class="mdui-card-content mdui-typo">
+        
+        <div class="p-summary" style="display:none"></div>
+        <main class="e-content"><p>トップページのRSSフィードが4時過ぎに配信されていたことから察するに、cronは正常に作動して再構築がきちんとできていたっぽい。</p>
+<p>うん。4時にcron走らせてるんだ。誰も来なそうなので。</p>
+<p>ちなみに再構築コマンドをメモっておくと、</p>
+<p>(パス省略…)mt-rebuild.pl -all</p>
+<p>以上。<br>どのブログを再構築するかとか、イロイロ設定可能らしいけど、ぇー全部一括でぃぃょ、ってことで。</p>
+<p>そんなどうでもよさそうなメモのためのエントリなのでした。</p>
+</main>
+        
+    </div>
+    
+</article>
+
+    
+        <article class="h-entry mdui-card mdui-hoverable mdui-shadow-1 mdui-m-y-2" style="opacity: 1; border-radius: 4px"
+>
+    
+    <div class="mdui-card-primary mdui-ripple">
+    <div class="mdui-card-primary-title">
+        <a role="heading" aria-level="1" class="u-url p-name mdui-text-color-theme-text" href="/tech/2009/03/39/">cronを設定</a>
+        <a class="p-author h-card" style="display:none" href="https://junka.net/tech">Junka</a>
+        
+    </div>
+    <div class="mdui-card-primary-subtitle mdui-typo">
+        <div> <a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/">cms</a>><a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/MovableType/">MovableType</a></div>
+        
+        <time class="dt-published" mdui-tooltip="{content:'投稿日：2009-03-23 12:18<br>編集日：2024-04-17 03:54'}" datetime="2009-03-22T15:18:48.000Z">2009-03-23</time>
+        
+        <span>-</span>
+        <span><a class="tag-none-link" href="/tech/tags/MovableType/" rel="tag">MovableType</a> <a class="tag-none-link" href="/tech/tags/cron/" rel="tag">cron</a></span>
+        
+    </div>
+</div>
+
+    
+    
+    <div class="mdui-divider"></div>
+    <div class="mdui-card-content mdui-typo">
+        
+        <div class="p-summary" style="display:none"></div>
+        <main class="e-content"><p>MT改造をちまちま進めています。</p>
+<p>MTってやっぱり最高のパフォーマンスを得る為には、定期的に再構築した方が良いじゃないですか。</p>
+<p>そこで、<a target="_blank" rel="noopener" href="http://appnel.com/code/mt-rebuild">mt-rebuild</a>っとゆープラグインとcronを使って定期的に自動再構築できるようにしたのだー</p>
+<p>ていうかcronってなんじゃ？<br>っと最近まで思っていたのだけど、実はついこの間から、MTブログのエントリー予約機能を使うにあたってcronとゆーものをちょっと覚えたばかり。</p>
+<p>うーむ、これを使うとブログのマイコーがちょう楽ちんゲフンゲフン</p>
+<p>まあつまり、定期的に設定したタスクを実行してくれる便利な仕組みですね。</p>
+<p>再構築cronに関してはさっきテストしたんだけど、上手くいってるのかいってないのかいまいちよくわかりませんね☆（更新した箇所が無いので）</p>
+<p>ところでcronってどう読むの？クーロン？クローン？わたしはクロンで脳内再生されてた。</p>
+</main>
+        
+    </div>
+    
+</article>
+
+    
+        <article class="h-entry mdui-card mdui-hoverable mdui-shadow-1 mdui-m-y-2" style="opacity: 1; border-radius: 4px"
+>
+    
+    <div class="mdui-card-primary mdui-ripple">
+    <div class="mdui-card-primary-title">
+        <a role="heading" aria-level="1" class="u-url p-name mdui-text-color-theme-text" href="/tech/2008/12/17/">sort_byアホすぎ</a>
+        <a class="p-author h-card" style="display:none" href="https://junka.net/tech">Junka</a>
+        
+    </div>
+    <div class="mdui-card-primary-subtitle mdui-typo">
+        <div> <a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/">cms</a>><a class="mdui-text-color-theme-text category-link" href="/tech/categories/cms/MovableType/">MovableType</a></div>
+        
+        <time class="dt-published" mdui-tooltip="{content:'投稿日：2008-12-07 10:43<br>編集日：2024-04-17 03:54'}" datetime="2008-12-07T01:43:22.000Z">2008-12-07</time>
+        
+        <span>-</span>
+        <span><a class="tag-none-link" href="/tech/tags/MovableType/" rel="tag">MovableType</a></span>
+        
+    </div>
+</div>
+
+    
+    
+    <div class="mdui-divider"></div>
+    <div class="mdui-card-content mdui-typo">
+        
+        <div class="p-summary" style="display:none"></div>
+        <main class="e-content"><p>今日はMovable Type(MT)の話題。<br>今のわたしはMTを使いこなして巣を公開することが急務。</p>
+<p>なのになのに！全然思うようにいかない！<br>ドキュメントの通りに作っているのに、期待通りの挙動をしてくれない…どうしたらいいのっ！</p>
+<p>特にsort_by、sort_orderの挙動がおかしすぎ。シャーッスゾ！</p>
+<p>以上泣き言でした。</p>
+</main>
+        
+    </div>
+    
+</article>
+
+    
+    
+</section>
+
+    </div>
+    <a href="#" class="mdui-fab mdui-fab-fixed mdui-hidden-xs0 mdui-color-theme-accent mdui-ripple"><i class="mdui-icon material-icons">keyboard_arrow_up</i></a>
+
+
+<script src="https://cdn.jsdelivr.net/npm/mdui@1.0.2/dist/js/mdui.min.js"></script>
+
+
+    <script src="/tech/js/s-hide-bt.js"></script>
 
 <script>
     var $ = mdui.$;
